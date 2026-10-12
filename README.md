@@ -1,30 +1,26 @@
 # vetcongweb
 
-WebGL reimplementation of the 2003 FPS **Vietcong** (Pterodon / Illusion Softworks). Abandonedware fan project focused on multiplayer (singleplayer first).
+Procedural Vietcong-style FPS engine (Three.js / WebGL). Fan project inspired by the 2003 game. Fully generated content — no original assets.
 
-**Not for resale.** Do not distribute original game assets. Users must own a legitimate copy of the game. This is an engine/recompile effort referencing public specs.
+**Not for resale.** Non-commercial fan work. Does not include or load copyrighted game files.
 
-## References
-- [OpenVietcong/vc-spec](https://github.com/OpenVietcong/vc-spec) — file format documentation (BES models, CBF archives, etc.)
-- [OpenVietcong/libvc](https://github.com/OpenVietcong/libvc) — C library for documented formats
-- [OpenVietcong/blender-plugin-vietcong](https://github.com/OpenVietcong/blender-plugin-vietcong) — BES import/export
-- Other community tools: vietcong-unpacker, VC_Scripter
+## Features
+- Procedural jungle (instanced trees + cover)
+- Enemy AI (patrol / chase / shoot)
+- Player movement, jump, reload (R), damage
+- HUD, hit particles, score
+- Optimized InstancedMesh + particle pool
 
-## Tech
-- Three.js (WebGL)
-- InstancedMesh for trees/crates (low draw calls)
-- Pointer lock FPS controls + jump
-- Pooled hit particles, HUD (health/ammo/score)
-- Optimized shadow map, pixel ratio cap
-- Future: asset loaders for BES/CBF, networking (WebRTC/WebSocket), multiplayer sync, real collision
+## Controls
+WASD move | Space jump | R reload | Mouse look | Click shoot | Esc unlock
 
 ## Run
-Open `index.html` in a modern browser (or serve via `npx serve` / any static server). Click canvas to capture mouse.
+Open `index.html` in a modern browser or serve statically (`npx serve`). Click to lock mouse.
+
+## References
+OpenVietcong specs and tools for people who own the original game.
 
 ## Status
-Playable optimized prototype. Singleplayer movement, jump, shooting with feedback. Multiplayer and asset pipeline planned.
+Playable procedural prototype. Multiplayer and advanced systems planned.
 
-## CI
-GitHub Actions runs basic syntax and structure checks on push/PR.
-
-MIT License. Respect original IP; this is non-commercial fan work on abandoned title.
+MIT License.

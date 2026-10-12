@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>vetcongweb — Vietcong WebGL</title>
+  <title>vetcongweb — Procedural Vietcong-style</title>
   <style>
     body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; }
     canvas { display: block; }
-    #info { position: absolute; top: 10px; left: 10px; z-index: 10; pointer-events: none; font-size: 14px; text-shadow: 0 0 4px #000; }
-    #hud { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; display: flex; gap: 40px; font-size: 18px; text-shadow: 0 0 6px #000; }
-    #crosshair { position: absolute; top: 50%; left: 50%; width: 16px; height: 16px; margin: -8px; border: 2px solid #0f0; border-radius: 50%; pointer-events: none; box-shadow: 0 0 4px #0f0; }
+    #info { position: absolute; top: 10px; left: 10px; z-index: 10; pointer-events: none; font-size: 13px; text-shadow: 0 0 4px #000; }
+    #hud { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; display: flex; gap: 36px; font-size: 18px; text-shadow: 0 0 6px #000; }
+    #crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; margin: -7px; border: 2px solid #0f0; border-radius: 50%; pointer-events: none; }
     #crosshair::before, #crosshair::after { content: ''; position: absolute; background: #0f0; }
-    #crosshair::before { width: 2px; height: 10px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
-    #crosshair::after { width: 10px; height: 2px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    #crosshair::before { width: 2px; height: 8px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+    #crosshair::after { width: 8px; height: 2px; left: 50%; top: 50%; transform: translate(-50%, -50%); }
   </style>
 </head>
 <body>
-  <div id="info">WASD move | Space jump | Mouse look | Click shoot | Esc unlock<br>Vietcong WebGL prototype (fan reimplementation of abandoned 2003 title)</div>
+  <div id="info">WASD | Space jump | R reload | Click shoot | Esc unlock<br>Procedural Vietcong-style FPS (fan engine, no original assets)</div>
   <div id="hud">
     <div>HP: <span id="health">100</span></div>
-    <div>AMMO: <span id="ammo">30</span></div>
+    <div>AMMO: <span id="ammo">30/90</span></div>
     <div>SCORE: <span id="score">0</span></div>
   </div>
   <div id="crosshair"></div>
