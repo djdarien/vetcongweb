@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Syntax check JS
+        run: node --check js/main.js
+
+      - name: Validate HTML structure
+        run: |
+          if ! grep -q '<script type="module" src="js/main.js">' index.html; then
+            echo "Missing main.js script tag"
+            exit 1
+          fi
+          if ! grep -q 'id="health"' index.html; then
+            echo "Missing HUD elements"
+            exit 1
+          fi
+          echo "HTML structure OK"
+
+      - name: Check required files
+        run: |
+          for f in index.html js/main.js README.md; do
+            if [ ! -f "$f" ]; then
+              echo "Missing $f"
+              exit 1
+            fi
+          done
+          echo "All required files present"

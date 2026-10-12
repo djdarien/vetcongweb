@@ -12,14 +12,18 @@ WebGL reimplementation of the 2003 FPS **Vietcong** (Pterodon / Illusion Softwor
 
 ## Tech
 - Three.js (WebGL)
-- Pointer lock FPS controls
-- Basic scene, movement, simple shooting stub
-- Future: asset loaders for BES/CBF, networking (WebRTC/WebSocket), multiplayer sync
+- Pointer lock FPS controls + jump
+- Procedural jungle cover (trees, crates)
+- HUD (health/ammo/score), hit particles
+- Future: asset loaders for BES/CBF, networking (WebRTC/WebSocket), multiplayer sync, real collision
 
 ## Run
 Open `index.html` in a modern browser (or serve via `npx serve` / any static server). Click canvas to capture mouse.
 
 ## Status
-Prototype only. Singleplayer movement/shooting skeleton. Multiplayer and asset pipeline planned.
+Playable prototype. Singleplayer movement, jump, shooting with feedback. Multiplayer and asset pipeline planned.
+
+## CI
+GitHub Actions runs basic syntax and structure checks on push/PR.
 
 MIT License. Respect original IP; this is non-commercial fan work on abandoned title.
