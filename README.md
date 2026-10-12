@@ -1,25 +1,25 @@
 # vetcongweb
 
-Procedural Vietcong-style FPS engine with multiplayer (Three.js / WebGL). Fully generated content inspired by dense jungle atmosphere.
+Procedural Vietcong-style FPS with multiplayer. Fully generated content.
 
-**Not for resale.** Non-commercial fan project. No original game assets.
+**Not for resale.** Non-commercial. No original assets or Sketchfab models embedded.
+
+## Maps
+- **Stream**: Jungle river with dense banks (inspired by classic Stream map layout)
+- **Halong Port**: Docks, warehouses, waterfront (inspired by Halong Port)
+
+Select via dropdown. Visual style references public Vietnam War imagery only.
 
 ## Features
-- Dense procedural jungle, huts, cover, fog
-- Enemies with AI, damage, reload, score
-- WebSocket multiplayer (position sync)
+- Procedural maps, enemies, reload, damage
+- WebSocket multiplayer
 - Optimized instancing
 
-## Singleplayer
-Open `index.html` or `npx serve`.
-
-## Multiplayer
-1. `npm install`
-2. `npm run server`
-3. Open `index.html` in multiple clients
-4. Edit `SERVER` in `js/main.js` for remote host
+## Run
+Singleplayer: open `index.html`
+Multiplayer: `npm install && npm run server` then open in multiple clients
 
 ## Controls
-WASD | Space jump | R reload | Mouse look | Click shoot | Esc unlock
+WASD | Space | R reload | Mouse | Click shoot | Esc unlock
 
 MIT License.
