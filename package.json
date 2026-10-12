@@ -1,0 +1,12 @@
+{
+  "name": "vetcongweb",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Procedural Vietcong-style FPS with multiplayer",
+  "scripts": {
+    "server": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}
