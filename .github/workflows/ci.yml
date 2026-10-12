@@ -18,7 +18,13 @@ jobs:
           node-version: '20'
 
       - name: Syntax check JS
-        run: node --check js/main.js
+        run: |
+          node --check js/main.js
+          node --check server.js
+          node --check tests/maps.test.js
+
+      - name: Run map tests
+        run: npm test
 
       - name: Validate HTML structure
         run: |
@@ -30,11 +36,15 @@ jobs:
             echo "Missing HUD elements"
             exit 1
           fi
+          if ! grep -q 'id="mapSelect"' index.html; then
+            echo "Missing map selector"
+            exit 1
+          fi
           echo "HTML structure OK"
 
       - name: Check required files
         run: |
-          for f in index.html js/main.js README.md; do
+          for f in index.html js/main.js README.md server.js package.json tests/maps.test.js; do
             if [ ! -f "$f" ]; then
               echo "Missing $f"
               exit 1

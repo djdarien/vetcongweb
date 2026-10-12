@@ -14,10 +14,16 @@ Select via dropdown. Visual style references public Vietnam War imagery only.
 - Procedural maps, enemies, reload, damage
 - WebSocket multiplayer
 - Optimized instancing
+- Automated map tests
 
 ## Run
 Singleplayer: open `index.html`
 Multiplayer: `npm install && npm run server` then open in multiple clients
+
+## Tests
+```bash
+npm test
+```
 
 ## Controls
 WASD | Space | R reload | Mouse | Click shoot | Esc unlock

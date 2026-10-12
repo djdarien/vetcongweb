@@ -4,7 +4,8 @@
   "private": true,
   "description": "Procedural Vietcong-style FPS with multiplayer",
   "scripts": {
-    "server": "node server.js"
+    "server": "node server.js",
+    "test": "node tests/maps.test.js"
   },
   "dependencies": {
     "ws": "^8.18.0"
