@@ -7,6 +7,8 @@ let remotePlayers = new Map();
 let trunks, leaves, boxes, water;
 const dummy = new THREE.Object3D();
 let currentMap = 'stream';
+let ws = null;
+let myId = null;
 
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
@@ -18,6 +20,7 @@ let mag = 90;
 let score = 0;
 let reloading = false;
 let hudDirty = true;
+let reloadTimer = 0;
 
 const healthEl = document.getElementById('health');
 const ammoEl = document.getElementById('ammo');
@@ -54,7 +57,6 @@ function buildStream() {
   ground.receiveShadow = true;
   scene.add(ground);
 
-  // Stream
   water = new THREE.Mesh(new THREE.PlaneGeometry(12, 180), new THREE.MeshLambertMaterial({ color: 0x2a5a7a, transparent: true, opacity: 0.7 }));
   water.rotation.x = -Math.PI / 2;
   water.position.y = 0.1;
@@ -123,7 +125,6 @@ function buildHalong() {
   water.position.set(0, 0.05, -60);
   scene.add(water);
 
-  // Docks / warehouses
   const dockMat = new THREE.MeshLambertMaterial({ color: 0x5a4a30 });
   const wallMat = new THREE.MeshLambertMaterial({ color: 0x6a5a40 });
   for (let i = 0; i < 4; i++) {
@@ -137,7 +138,6 @@ function buildHalong() {
     scene.add(warehouse);
   }
 
-  // Sparse trees
   const TREE_COUNT = 20;
   trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.35, 5, 5), new THREE.MeshLambertMaterial({ color: 0x3a2818 }), TREE_COUNT);
   leaves = new THREE.InstancedMesh(new THREE.ConeGeometry(2, 3, 5), new THREE.MeshLambertMaterial({ color: 0x1a4a1a }), TREE_COUNT);
@@ -182,6 +182,55 @@ function initMap(name) {
   scene.add(controls.getObject());
   playerObj.position.set(0, 1.6, 10);
   updateHUD();
+}
+
+function tryReload() {
+  if (reloading || ammo >= 30 || mag <= 0) return;
+  reloading = true;
+  reloadTimer = 1.6;
+}
+
+function connectMP() {
+  const SERVER = 'ws://localhost:8080';
+  try {
+    ws = new WebSocket(SERVER);
+    ws.onopen = () => {
+      myId = Math.random().toString(36).slice(2, 10);
+      ws.send(JSON.stringify({ type: 'join', id: myId }));
+      hudDirty = true;
+    };
+    ws.onmessage = (ev) => {
+      try {
+        const msg = JSON.parse(ev.data);
+        if (msg.type === 'players') {
+          const seen = new Set();
+          for (const p of msg.players || []) {
+            if (p.id === myId) continue;
+            seen.add(p.id);
+            if (!remotePlayers.has(p.id)) {
+              const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 1, 4, 6), new THREE.MeshLambertMaterial({ color: 0x2a6a8a }));
+              m.castShadow = true;
+              scene.add(m);
+              remotePlayers.set(p.id, m);
+            }
+            const m = remotePlayers.get(p.id);
+            m.position.fromArray(p.pos);
+            if (typeof p.rot === 'number') m.rotation.y = p.rot;
+          }
+          for (const id of [...remotePlayers.keys()]) {
+            if (!seen.has(id)) {
+              scene.remove(remotePlayers.get(id));
+              remotePlayers.delete(id);
+            }
+          }
+        } else if (msg.type === 'leave') {
+          const m = remotePlayers.get(msg.id);
+          if (m) { scene.remove(m); remotePlayers.delete(msg.id); }
+        }
+      } catch (_) {}
+    };
+    ws.onclose = ws.onerror = () => { hudDirty = true; };
+  } catch (_) {}
 }
 
 function init() {
@@ -244,57 +293,6 @@ function init() {
     }
   });
 
-  let reloadTimer = 0;
-  function tryReload() {
-    if (reloading || ammo >= 30 || mag <= 0) return;
-    reloading = true;
-    reloadTimer = 1.6;
-  }
-
-  let ws = null;
-  let myId = null;
-  const SERVER = 'ws://localhost:8080';
-  function connectMP() {
-    try {
-      ws = new WebSocket(SERVER);
-      ws.onopen = () => {
-        myId = Math.random().toString(36).slice(2, 10);
-        ws.send(JSON.stringify({ type: 'join', id: myId }));
-        hudDirty = true;
-      };
-      ws.onmessage = (ev) => {
-        try {
-          const msg = JSON.parse(ev.data);
-          if (msg.type === 'players') {
-            const seen = new Set();
-            for (const p of msg.players || []) {
-              if (p.id === myId) continue;
-              seen.add(p.id);
-              if (!remotePlayers.has(p.id)) {
-                const m = new THREE.Mesh(new THREE.CapsuleGeometry(0.35, 1, 4, 6), new THREE.MeshLambertMaterial({ color: 0x2a6a8a }));
-                m.castShadow = true;
-                scene.add(m);
-                remotePlayers.set(p.id, m);
-              }
-              const m = remotePlayers.get(p.id);
-              m.position.fromArray(p.pos);
-              if (typeof p.rot === 'number') m.rotation.y = p.rot;
-            }
-            for (const id of [...remotePlayers.keys()]) {
-              if (!seen.has(id)) {
-                scene.remove(remotePlayers.get(id));
-                remotePlayers.delete(id);
-              }
-            }
-          } else if (msg.type === 'leave') {
-            const m = remotePlayers.get(msg.id);
-            if (m) { scene.remove(m); remotePlayers.delete(msg.id); }
-          }
-        } catch (_) {}
-      };
-      ws.onclose = ws.onerror = () => { hudDirty = true; };
-    } catch (_) {}
-  }
   connectMP();
 
   let netTimer = 0;
