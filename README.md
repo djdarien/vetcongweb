@@ -1,12 +1,10 @@
 # vetcongweb
 
-Procedural Vietcong-style FPS. Mobile-friendly. Fully generated content.
+Procedural Vietcong-style FPS. Mobile-friendly with settings menu. Fully generated content.
 
 **Not for resale.** Non-commercial fan project.
 
 ## One-click setup
-
-### Desktop / testing
 ```bash
 git clone https://github.com/djdarien/vetcongweb.git
 cd vetcongweb
@@ -15,22 +13,27 @@ npm start
 ```
 Open http://localhost:3000
 
-### Multiplayer
-```bash
-npm run server
-```
-Then open the page in multiple clients.
+## Settings
+Click **MENU** (or Esc) for:
+- Graphics Quality (Low / Medium / High)
+- Shadows on/off
+- Fog on/off
+- Look Sensitivity (affects mobile touch look)
 
-### Mobile
-Open the same URL on your phone (same network) or host via GitHub Pages. Touch controls appear automatically.
+Settings are saved in the browser.
+
+## Controls
+**Desktop:** WASD, Space, R, Mouse, Click, Esc for menu
+**Mobile:** Left joystick, right-side drag look, FIRE / JUMP / R buttons. Menu button for settings.
 
 ## Maps
 - Stream — jungle river
 - Halong Port — docks and warehouses
 
-## Controls
-**Desktop:** WASD, Space, R, Mouse, Click
-**Mobile:** Left joystick move, right-side drag look, FIRE / JUMP / R buttons
+## Multiplayer
+```bash
+npm run server
+```
 
 ## Tests
 ```bash

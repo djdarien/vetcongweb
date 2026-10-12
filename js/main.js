@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { setupMobile } from './mobile.js';
+import { loadSettings, applyGraphics, bindMenu } from './settings.js';
 
 let scene, camera, renderer, controls, playerObj;
 let enemies = [];
@@ -10,6 +11,7 @@ const dummy = new THREE.Object3D();
 let currentMap = 'stream';
 let ws = null;
 let myId = null;
+let settings = loadSettings();
 
 const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
@@ -48,11 +50,11 @@ function clearScene() {
 
 function buildStream() {
   scene.background = new THREE.Color(0x3d7a4a);
-  scene.fog = new THREE.FogExp2(0x3d7a4a, 0.011);
+  scene.fog = settings.fog === 'on' ? new THREE.FogExp2(0x3d7a4a, 0.011) : null;
   scene.add(new THREE.HemisphereLight(0x6aa86a, 0x1a3010, 0.5));
   const dir = new THREE.DirectionalLight(0xffeecc, 0.8);
   dir.position.set(40, 80, 20);
-  dir.castShadow = true;
+  dir.castShadow = settings.shadows === 'on';
   scene.add(dir);
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400, 12, 12), new THREE.MeshLambertMaterial({ color: 0x1e3d12 }));
@@ -65,10 +67,10 @@ function buildStream() {
   water.position.y = 0.1;
   scene.add(water);
 
-  const TREE_COUNT = 70;
+  const TREE_COUNT = settings.quality === 'low' ? 40 : 70;
   trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.2, 0.3, 4.5, 5), new THREE.MeshLambertMaterial({ color: 0x2e2014 }), TREE_COUNT);
   leaves = new THREE.InstancedMesh(new THREE.ConeGeometry(1.7, 2.8, 5), new THREE.MeshLambertMaterial({ color: 0x0f3d0f }), TREE_COUNT);
-  trunks.castShadow = leaves.castShadow = true;
+  trunks.castShadow = leaves.castShadow = settings.shadows === 'on';
   for (let i = 0; i < TREE_COUNT; i++) {
     let x = (Math.random() - 0.5) * 200;
     let z = (Math.random() - 0.5) * 180;
@@ -87,7 +89,7 @@ function buildStream() {
   scene.add(trunks, leaves);
 
   boxes = new THREE.InstancedMesh(new THREE.BoxGeometry(2, 2, 2), new THREE.MeshLambertMaterial({ color: 0x4a3820 }), 6);
-  boxes.castShadow = boxes.receiveShadow = true;
+  boxes.castShadow = boxes.receiveShadow = settings.shadows === 'on';
   for (let i = 0; i < 6; i++) {
     dummy.position.set((Math.random() - 0.5) * 80, 1, (Math.random() - 0.5) * 80);
     dummy.scale.set(1, 1, 1);
@@ -111,11 +113,11 @@ function buildStream() {
 
 function buildHalong() {
   scene.background = new THREE.Color(0x4a7a9a);
-  scene.fog = new THREE.FogExp2(0x4a7a9a, 0.008);
+  scene.fog = settings.fog === 'on' ? new THREE.FogExp2(0x4a7a9a, 0.008) : null;
   scene.add(new THREE.HemisphereLight(0x7ab0c0, 0x2a3a20, 0.5));
   const dir = new THREE.DirectionalLight(0xfff0d0, 0.9);
   dir.position.set(50, 90, 30);
-  dir.castShadow = true;
+  dir.castShadow = settings.shadows === 'on';
   scene.add(dir);
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(300, 200, 8, 8), new THREE.MeshLambertMaterial({ color: 0x3a4a28 }));
@@ -137,11 +139,11 @@ function buildHalong() {
     scene.add(pier);
     const warehouse = new THREE.Mesh(new THREE.BoxGeometry(12, 6, 10), wallMat);
     warehouse.position.set(-40 + i * 25, 3, 10);
-    warehouse.castShadow = warehouse.receiveShadow = true;
+    warehouse.castShadow = warehouse.receiveShadow = settings.shadows === 'on';
     scene.add(warehouse);
   }
 
-  const TREE_COUNT = 20;
+  const TREE_COUNT = settings.quality === 'low' ? 10 : 20;
   trunks = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.35, 5, 5), new THREE.MeshLambertMaterial({ color: 0x3a2818 }), TREE_COUNT);
   leaves = new THREE.InstancedMesh(new THREE.ConeGeometry(2, 3, 5), new THREE.MeshLambertMaterial({ color: 0x1a4a1a }), TREE_COUNT);
   for (let i = 0; i < TREE_COUNT; i++) {
@@ -184,6 +186,7 @@ function initMap(name) {
   else buildStream();
   scene.add(controls.getObject());
   playerObj.position.set(0, 1.6, 10);
+  applyGraphics(renderer, scene, settings);
   updateHUD();
 }
 
@@ -263,7 +266,6 @@ function init() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   document.body.appendChild(renderer.domElement);
 
@@ -273,7 +275,9 @@ function init() {
 
   const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   if (!isMobile) {
-    document.addEventListener('click', () => controls.lock());
+    document.addEventListener('click', () => {
+      if (!document.getElementById('menuOverlay').classList.contains('visible')) controls.lock();
+    });
   }
 
   initMap('stream');
@@ -303,19 +307,24 @@ function init() {
     if (!isMobile && controls.isLocked) shoot();
   });
 
-  // Mobile look via mousemove events dispatched from touch
   document.addEventListener('mousemove', (e) => {
     if (isMobile && e.movementX !== undefined) {
-      lookYaw -= e.movementX * 0.002;
-      lookPitch -= e.movementY * 0.002;
+      const sens = settings.sensitivity || 1;
+      lookYaw -= e.movementX * 0.002 * sens;
+      lookPitch -= e.movementY * 0.002 * sens;
       lookPitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, lookPitch));
       playerObj.rotation.y = lookYaw;
       camera.rotation.x = lookPitch;
     }
   });
 
-  setupMobile(keys, shoot, tryReload);
+  setupMobile(keys, shoot, tryReload, () => settings.sensitivity || 1);
   connectMP();
+
+  bindMenu((s) => {
+    settings = s;
+    initMap(currentMap);
+  });
 
   let netTimer = 0;
   const clock = new THREE.Clock();

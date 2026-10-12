@@ -8,10 +8,11 @@
   <style>
     body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; touch-action: none; }
     canvas { display: block; }
-    #info { position: absolute; top: 8px; left: 8px; z-index: 10; pointer-events: none; font-size: 12px; text-shadow: 0 0 4px #000; max-width: 60vw; }
+    #info { position: absolute; top: 8px; left: 8px; z-index: 10; pointer-events: none; font-size: 12px; text-shadow: 0 0 4px #000; max-width: 50vw; }
     #hud { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; display: flex; gap: 16px; font-size: 14px; text-shadow: 0 0 6px #000; flex-wrap: wrap; justify-content: center; }
     #crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; margin: -7px; border: 2px solid #0f0; border-radius: 50%; pointer-events: none; }
-    #mapSelect { position: absolute; top: 8px; right: 8px; z-index: 10; background: #111; color: #0f0; border: 1px solid #0f0; padding: 6px; font-size: 14px; }
+    #mapSelect { position: absolute; top: 8px; right: 70px; z-index: 10; background: #111; color: #0f0; border: 1px solid #0f0; padding: 6px; font-size: 14px; }
+    #btnMenu { position: absolute; top: 8px; right: 8px; z-index: 10; background: #111; color: #0f0; border: 1px solid #0f0; padding: 6px 10px; font-size: 14px; cursor: pointer; }
     .touch-controls { display: none; position: absolute; z-index: 20; }
     .touch-controls.visible { display: block; }
     #joystick { left: 20px; bottom: 40px; width: 120px; height: 120px; }
@@ -21,14 +22,23 @@
     #btn-shoot { right: 20px; bottom: 90px; }
     #btn-jump { right: 100px; bottom: 40px; }
     #btn-reload { right: 20px; bottom: 20px; width: 50px; height: 50px; font-size: 10px; }
+    #menuOverlay { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.75); z-index: 50; }
+    #menuOverlay.visible { display: flex; align-items: center; justify-content: center; }
+    #menuBox { background: #111; border: 2px solid #0f0; padding: 24px; min-width: 280px; max-width: 90vw; }
+    #menuBox h2 { margin: 0 0 16px; font-size: 18px; }
+    #menuBox label { display: block; margin: 12px 0 4px; font-size: 14px; }
+    #menuBox select, #menuBox input[type=range] { width: 100%; background: #000; color: #0f0; border: 1px solid #0f0; padding: 6px; }
+    #menuBox button { margin-top: 16px; background: #0f0; color: #000; border: none; padding: 8px 16px; cursor: pointer; font-family: inherit; }
+    #menuBox .row { display: flex; gap: 8px; margin-top: 12px; }
   </style>
 </head>
 <body>
-  <div id="info">WASD / Touch | Space/Jump | R/Reload | Click/Shoot<br>Stream / Halong Port</div>
+  <div id="info">WASD / Touch | Space/Jump | R/Reload | Click/Shoot</div>
   <select id="mapSelect">
     <option value="stream">Stream</option>
     <option value="halong">Halong Port</option>
   </select>
+  <button id="btnMenu">MENU</button>
   <div id="hud">
     <div>HP: <span id="health">100</span></div>
     <div>AMMO: <span id="ammo">30/90</span></div>
@@ -42,6 +52,33 @@
     <div class="btn" id="btn-shoot">FIRE</div>
     <div class="btn" id="btn-jump">JUMP</div>
     <div class="btn" id="btn-reload">R</div>
+  </div>
+  <div id="menuOverlay">
+    <div id="menuBox">
+      <h2>SETTINGS</h2>
+      <label>Graphics Quality</label>
+      <select id="setQuality">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <label>Shadows</label>
+      <select id="setShadows">
+        <option value="off">Off</option>
+        <option value="on" selected>On</option>
+      </select>
+      <label>Fog</label>
+      <select id="setFog">
+        <option value="off">Off</option>
+        <option value="on" selected>On</option>
+      </select>
+      <label>Look Sensitivity</label>
+      <input type="range" id="setSens" min="0.5" max="3" step="0.1" value="1">
+      <div class="row">
+        <button id="btnApply">APPLY</button>
+        <button id="btnClose">CLOSE</button>
+      </div>
+    </div>
   </div>
   <script type="importmap">
     {
