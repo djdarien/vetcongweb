@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
+import { setupMobile } from './mobile.js';
 
 let scene, camera, renderer, controls, playerObj;
 let enemies = [];
@@ -21,6 +22,8 @@ let score = 0;
 let reloading = false;
 let hudDirty = true;
 let reloadTimer = 0;
+let lookYaw = 0;
+let lookPitch = 0;
 
 const healthEl = document.getElementById('health');
 const ammoEl = document.getElementById('ammo');
@@ -190,6 +193,28 @@ function tryReload() {
   reloadTimer = 1.6;
 }
 
+function shoot() {
+  if (ammo <= 0 || reloading || health <= 0) return;
+  ammo--;
+  hudDirty = true;
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+  const hits = raycaster.intersectObjects(enemies, false);
+  if (hits.length > 0) {
+    const e = hits[0].object;
+    e.userData.health -= 25;
+    if (e.userData.health <= 0) {
+      scene.remove(e);
+      enemies.splice(enemies.indexOf(e), 1);
+      score += 50;
+      hudDirty = true;
+    }
+  }
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify({ type: 'shoot', pos: playerObj.position.toArray() }));
+  }
+}
+
 function connectMP() {
   const SERVER = 'ws://localhost:8080';
   try {
@@ -245,7 +270,11 @@ function init() {
   controls = new PointerLockControls(camera, document.body);
   playerObj = controls.getObject();
   scene.add(playerObj);
-  document.addEventListener('click', () => controls.lock());
+
+  const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!isMobile) {
+    document.addEventListener('click', () => controls.lock());
+  }
 
   initMap('stream');
 
@@ -270,29 +299,22 @@ function init() {
     if (e.code === 'KeyR') keys.r = false;
   });
 
-  const raycaster = new THREE.Raycaster();
-  const mouse = new THREE.Vector2(0, 0);
   document.addEventListener('mousedown', () => {
-    if (!controls.isLocked || ammo <= 0 || reloading || health <= 0) return;
-    ammo--;
-    hudDirty = true;
-    raycaster.setFromCamera(mouse, camera);
-    const hits = raycaster.intersectObjects(enemies, false);
-    if (hits.length > 0) {
-      const e = hits[0].object;
-      e.userData.health -= 25;
-      if (e.userData.health <= 0) {
-        scene.remove(e);
-        enemies.splice(enemies.indexOf(e), 1);
-        score += 50;
-        hudDirty = true;
-      }
-    }
-    if (ws && ws.readyState === 1) {
-      ws.send(JSON.stringify({ type: 'shoot', pos: playerObj.position.toArray() }));
+    if (!isMobile && controls.isLocked) shoot();
+  });
+
+  // Mobile look via mousemove events dispatched from touch
+  document.addEventListener('mousemove', (e) => {
+    if (isMobile && e.movementX !== undefined) {
+      lookYaw -= e.movementX * 0.002;
+      lookPitch -= e.movementY * 0.002;
+      lookPitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, lookPitch));
+      playerObj.rotation.y = lookYaw;
+      camera.rotation.x = lookPitch;
     }
   });
 
+  setupMobile(keys, shoot, tryReload);
   connectMP();
 
   let netTimer = 0;
@@ -338,7 +360,8 @@ function init() {
       }
     }
 
-    if (controls.isLocked && health > 0) {
+    const canMove = isMobile || controls.isLocked;
+    if (canMove && health > 0) {
       if (onGround && keys.space) {
         velocity.y = 7;
         onGround = false;

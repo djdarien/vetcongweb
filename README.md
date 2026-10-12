@@ -1,31 +1,40 @@
 # vetcongweb
 
-Procedural Vietcong-style FPS with multiplayer. Fully generated content.
+Procedural Vietcong-style FPS. Mobile-friendly. Fully generated content.
 
-**Not for resale.** Non-commercial. No original assets or Sketchfab models embedded.
+**Not for resale.** Non-commercial fan project.
+
+## One-click setup
+
+### Desktop / testing
+```bash
+git clone https://github.com/djdarien/vetcongweb.git
+cd vetcongweb
+npm install
+npm start
+```
+Open http://localhost:3000
+
+### Multiplayer
+```bash
+npm run server
+```
+Then open the page in multiple clients.
+
+### Mobile
+Open the same URL on your phone (same network) or host via GitHub Pages. Touch controls appear automatically.
 
 ## Maps
-- **Stream**: Jungle river with dense banks (inspired by classic Stream map layout)
-- **Halong Port**: Docks, warehouses, waterfront (inspired by Halong Port)
+- Stream — jungle river
+- Halong Port — docks and warehouses
 
-Select via dropdown. Visual style references public Vietnam War imagery only.
-
-## Features
-- Procedural maps, enemies, reload, damage
-- WebSocket multiplayer
-- Optimized instancing
-- Automated map tests
-
-## Run
-Singleplayer: open `index.html`
-Multiplayer: `npm install && npm run server` then open in multiple clients
+## Controls
+**Desktop:** WASD, Space, R, Mouse, Click
+**Mobile:** Left joystick move, right-side drag look, FIRE / JUMP / R buttons
 
 ## Tests
 ```bash
 npm test
 ```
-
-## Controls
-WASD | Space | R reload | Mouse | Click shoot | Esc unlock
 
 MIT License.

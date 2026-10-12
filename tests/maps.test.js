@@ -14,31 +14,24 @@ function assert(cond, msg) {
 
 const mainJs = fs.readFileSync(path.join(__dirname, '../js/main.js'), 'utf8');
 const indexHtml = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+const mobileJs = fs.readFileSync(path.join(__dirname, '../js/mobile.js'), 'utf8');
 
-// Map selector present
 assert(indexHtml.includes('id="mapSelect"'), 'mapSelect dropdown exists');
 assert(indexHtml.includes('value="stream"'), 'Stream option present');
 assert(indexHtml.includes('value="halong"'), 'Halong Port option present');
-
-// Map builders exist
 assert(mainJs.includes('function buildStream'), 'buildStream function defined');
 assert(mainJs.includes('function buildHalong'), 'buildHalong function defined');
 assert(mainJs.includes('function initMap'), 'initMap function defined');
-
-// Stream map elements
 assert(mainJs.includes('buildStream()'), 'Stream is default or selectable');
 assert(/water\s*=\s*new THREE\.Mesh/.test(mainJs), 'Water mesh created in maps');
-
-// Halong elements
 assert(mainJs.includes('pier'), 'Piers created for Halong');
 assert(mainJs.includes('warehouse'), 'Warehouses created for Halong');
-
-// Map switch logic
 assert(mainJs.includes('initMap(e.target.value)'), 'Map change handler wired');
 assert(mainJs.includes('currentMap'), 'currentMap state tracked');
-
-// Multiplayer still present
 assert(mainJs.includes('new WebSocket'), 'WebSocket multiplayer client present');
-assert(mainJs.includes('type: \'update\''), 'Position update message sent');
+assert(mainJs.includes("type: 'update'"), 'Position update message sent');
+assert(indexHtml.includes('touchControls'), 'Mobile touch controls present');
+assert(mobileJs.includes('setupMobile'), 'Mobile module exports setup');
+assert(mainJs.includes('setupMobile'), 'Main imports mobile setup');
 
-console.log('\nAll map tests passed.');
+console.log('\nAll map and mobile tests passed.');

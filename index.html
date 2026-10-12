@@ -2,19 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>vetcongweb — Procedural Maps</title>
   <style>
-    body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; }
+    body { margin: 0; overflow: hidden; background: #000; font-family: 'Courier New', monospace; color: #0f0; touch-action: none; }
     canvas { display: block; }
-    #info { position: absolute; top: 10px; left: 10px; z-index: 10; pointer-events: none; font-size: 13px; text-shadow: 0 0 4px #000; }
-    #hud { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; display: flex; gap: 24px; font-size: 16px; text-shadow: 0 0 6px #000; }
+    #info { position: absolute; top: 8px; left: 8px; z-index: 10; pointer-events: none; font-size: 12px; text-shadow: 0 0 4px #000; max-width: 60vw; }
+    #hud { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); z-index: 10; pointer-events: none; display: flex; gap: 16px; font-size: 14px; text-shadow: 0 0 6px #000; flex-wrap: wrap; justify-content: center; }
     #crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; margin: -7px; border: 2px solid #0f0; border-radius: 50%; pointer-events: none; }
-    #mapSelect { position: absolute; top: 10px; right: 10px; z-index: 10; background: #111; color: #0f0; border: 1px solid #0f0; padding: 4px; }
+    #mapSelect { position: absolute; top: 8px; right: 8px; z-index: 10; background: #111; color: #0f0; border: 1px solid #0f0; padding: 6px; font-size: 14px; }
+    .touch-controls { display: none; position: absolute; z-index: 20; }
+    .touch-controls.visible { display: block; }
+    #joystick { left: 20px; bottom: 40px; width: 120px; height: 120px; }
+    #joystick-base { width: 100%; height: 100%; border: 3px solid rgba(0,255,0,0.5); border-radius: 50%; position: relative; }
+    #joystick-stick { width: 50px; height: 50px; background: rgba(0,255,0,0.6); border-radius: 50%; position: absolute; left: 35px; top: 35px; }
+    .btn { position: absolute; width: 64px; height: 64px; border-radius: 50%; background: rgba(0,255,0,0.3); border: 2px solid #0f0; color: #0f0; font-size: 12px; display: flex; align-items: center; justify-content: center; user-select: none; }
+    #btn-shoot { right: 20px; bottom: 90px; }
+    #btn-jump { right: 100px; bottom: 40px; }
+    #btn-reload { right: 20px; bottom: 20px; width: 50px; height: 50px; font-size: 10px; }
   </style>
 </head>
 <body>
-  <div id="info">WASD | Space | R reload | Click shoot<br>Procedural Stream / Halong Port (reference only)</div>
+  <div id="info">WASD / Touch | Space/Jump | R/Reload | Click/Shoot<br>Stream / Halong Port</div>
   <select id="mapSelect">
     <option value="stream">Stream</option>
     <option value="halong">Halong Port</option>
@@ -27,6 +37,12 @@
     <div>MAP: <span id="map">STREAM</span></div>
   </div>
   <div id="crosshair"></div>
+  <div class="touch-controls" id="touchControls">
+    <div id="joystick"><div id="joystick-base"><div id="joystick-stick"></div></div></div>
+    <div class="btn" id="btn-shoot">FIRE</div>
+    <div class="btn" id="btn-jump">JUMP</div>
+    <div class="btn" id="btn-reload">R</div>
+  </div>
   <script type="importmap">
     {
       "imports": {
