@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x4a8bb0);
-scene.fog = new THREE.FogExp2(0x4a8bb0, 0.0065);
+scene.background = new THREE.Color(0x3d7a4a);
+scene.fog = new THREE.FogExp2(0x3d7a4a, 0.012);
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -17,55 +17,81 @@ const controls = new PointerLockControls(camera, document.body);
 scene.add(controls.getObject());
 document.addEventListener('click', () => controls.lock());
 
-scene.add(new THREE.HemisphereLight(0x7ec8e3, 0x1e3a0f, 0.45));
-const dir = new THREE.DirectionalLight(0xfff5e6, 1.0);
-dir.position.set(40, 90, 20);
+scene.add(new THREE.HemisphereLight(0x6aa86a, 0x1a3010, 0.55));
+const dir = new THREE.DirectionalLight(0xffeecc, 0.85);
+dir.position.set(30, 70, 15);
 dir.castShadow = true;
 dir.shadow.mapSize.set(1024, 1024);
 scene.add(dir);
 
+// Varied ground
 const ground = new THREE.Mesh(
-  new THREE.PlaneGeometry(500, 500, 20, 20),
-  new THREE.MeshLambertMaterial({ color: 0x245016 })
+  new THREE.PlaneGeometry(500, 500, 16, 16),
+  new THREE.MeshLambertMaterial({ color: 0x1e3d12 })
 );
 ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-const TREE_COUNT = 60;
+// Dense trees
+const TREE_COUNT = 90;
 const dummy = new THREE.Object3D();
 const trunks = new THREE.InstancedMesh(
-  new THREE.CylinderGeometry(0.22, 0.32, 5, 5),
-  new THREE.MeshLambertMaterial({ color: 0x3a2818 }),
+  new THREE.CylinderGeometry(0.18, 0.28, 4.5, 5),
+  new THREE.MeshLambertMaterial({ color: 0x2e2014 }),
   TREE_COUNT
 );
 const leaves = new THREE.InstancedMesh(
-  new THREE.ConeGeometry(2.0, 3.2, 5),
-  new THREE.MeshLambertMaterial({ color: 0x145214 }),
+  new THREE.ConeGeometry(1.6, 2.8, 5),
+  new THREE.MeshLambertMaterial({ color: 0x0f3d0f }),
   TREE_COUNT
 );
 trunks.castShadow = leaves.castShadow = true;
 for (let i = 0; i < TREE_COUNT; i++) {
-  const x = (Math.random() - 0.5) * 220;
-  const z = (Math.random() - 0.5) * 220;
-  dummy.position.set(x, 2.5, z);
+  const x = (Math.random() - 0.5) * 240;
+  const z = (Math.random() - 0.5) * 240;
+  const h = 0.8 + Math.random() * 0.6;
+  dummy.position.set(x, 2.2 * h, z);
+  dummy.scale.set(1, h, 1);
   dummy.updateMatrix();
   trunks.setMatrixAt(i, dummy.matrix);
-  dummy.position.y = 6;
+  dummy.position.y = 5.2 * h;
+  dummy.scale.set(1, 1, 1);
   dummy.updateMatrix();
   leaves.setMatrixAt(i, dummy.matrix);
 }
 trunks.instanceMatrix.needsUpdate = leaves.instanceMatrix.needsUpdate = true;
 scene.add(trunks, leaves);
 
+// Simple huts / cover
+const hutCount = 6;
+const hutGeo = new THREE.BoxGeometry(4, 2.5, 3);
+const hutMat = new THREE.MeshLambertMaterial({ color: 0x5a4630 });
+const roofMat = new THREE.MeshLambertMaterial({ color: 0x3a2a18 });
+for (let i = 0; i < hutCount; i++) {
+  const hut = new THREE.Mesh(hutGeo, hutMat);
+  const x = (Math.random() - 0.5) * 100;
+  const z = (Math.random() - 0.5) * 100;
+  hut.position.set(x, 1.25, z);
+  hut.castShadow = hut.receiveShadow = true;
+  scene.add(hut);
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(3.2, 1.5, 4), roofMat);
+  roof.position.set(x, 3.2, z);
+  roof.rotation.y = Math.PI / 4;
+  roof.castShadow = true;
+  scene.add(roof);
+}
+
+// Crates
 const boxes = new THREE.InstancedMesh(
-  new THREE.BoxGeometry(2.2, 2.2, 2.2),
+  new THREE.BoxGeometry(1.8, 1.8, 1.8),
   new THREE.MeshLambertMaterial({ color: 0x4a3820 }),
-  10
+  8
 );
 boxes.castShadow = boxes.receiveShadow = true;
-for (let i = 0; i < 10; i++) {
-  dummy.position.set((Math.random() - 0.5) * 90, 1.1, (Math.random() - 0.5) * 90);
+for (let i = 0; i < 8; i++) {
+  dummy.position.set((Math.random() - 0.5) * 70, 0.9, (Math.random() - 0.5) * 70);
+  dummy.scale.set(1, 1, 1);
   dummy.updateMatrix();
   boxes.setMatrixAt(i, dummy.matrix);
 }
@@ -73,20 +99,19 @@ boxes.instanceMatrix.needsUpdate = true;
 scene.add(boxes);
 
 const enemies = [];
-const enemyGeo = new THREE.CapsuleGeometry(0.38, 1.1, 4, 6);
-const enemyMat = new THREE.MeshLambertMaterial({ color: 0x6b3e1a });
+const enemyGeo = new THREE.CapsuleGeometry(0.36, 1.0, 4, 6);
+const enemyMat = new THREE.MeshLambertMaterial({ color: 0x5c3a1a });
 for (let i = 0; i < 5; i++) {
   const mesh = new THREE.Mesh(enemyGeo, enemyMat);
-  mesh.position.set((Math.random() - 0.5) * 70, 1.05, (Math.random() - 0.5) * 70);
+  mesh.position.set((Math.random() - 0.5) * 60, 1.0, (Math.random() - 0.5) * 60);
   mesh.castShadow = true;
-  mesh.userData = { health: 40, speed: 1.8 + Math.random() * 1.5, timer: 0 };
+  mesh.userData = { health: 40, speed: 1.6 + Math.random() * 1.2, timer: 0 };
   scene.add(mesh);
   enemies.push(mesh);
 }
 
-// Remote players
 const remotePlayers = new Map();
-const remoteMat = new THREE.MeshLambertMaterial({ color: 0x2288aa });
+const remoteMat = new THREE.MeshLambertMaterial({ color: 0x2a6a8a });
 function getRemote(id) {
   if (!remotePlayers.has(id)) {
     const m = new THREE.Mesh(enemyGeo, remoteMat);
@@ -98,10 +123,7 @@ function getRemote(id) {
 }
 function removeRemote(id) {
   const m = remotePlayers.get(id);
-  if (m) {
-    scene.remove(m);
-    remotePlayers.delete(id);
-  }
+  if (m) { scene.remove(m); remotePlayers.delete(id); }
 }
 
 const velocity = new THREE.Vector3();
@@ -204,10 +226,9 @@ function tryReload() {
   reloadTimer = 1.6;
 }
 
-// Multiplayer
 let ws = null;
 let myId = null;
-const SERVER = 'ws://localhost:8080'; // change to your self-hosted server
+const SERVER = 'ws://localhost:8080';
 
 function connectMP() {
   try {
@@ -260,12 +281,12 @@ function animate() {
     const ud = e.userData;
     const toPlayer = new THREE.Vector3().subVectors(playerObj.position, e.position);
     const dist = toPlayer.length();
-    if (dist < 22) {
+    if (dist < 20) {
       toPlayer.y = 0;
       toPlayer.normalize();
       e.position.addScaledVector(toPlayer, ud.speed * delta);
       e.lookAt(playerObj.position);
-      if (dist < 10 && Math.random() < 0.015) {
+      if (dist < 9 && Math.random() < 0.012) {
         health -= 4;
         hudDirty = true;
         spawnHit(playerObj.position.clone().add(new THREE.Vector3(0, 1, 0)), 0xff0000);
@@ -274,11 +295,11 @@ function animate() {
       ud.timer += delta;
       if (ud.timer > 2.5) {
         ud.timer = 0;
-        e.position.x += (Math.random() - 0.5) * 3;
-        e.position.z += (Math.random() - 0.5) * 3;
+        e.position.x += (Math.random() - 0.5) * 2.5;
+        e.position.z += (Math.random() - 0.5) * 2.5;
       }
     }
-    e.position.y = 1.05;
+    e.position.y = 1.0;
   }
 
   if (keys.r) tryReload();
@@ -310,8 +331,8 @@ function animate() {
     direction.z = Number(keys.w) - Number(keys.s);
     direction.x = Number(keys.d) - Number(keys.a);
     if (direction.lengthSq() > 0) direction.normalize();
-    if (keys.w || keys.s) velocity.z -= direction.z * 30 * delta;
-    if (keys.a || keys.d) velocity.x -= direction.x * 30 * delta;
+    if (keys.w || keys.s) velocity.z -= direction.z * 28 * delta;
+    if (keys.a || keys.d) velocity.x -= direction.x * 28 * delta;
     controls.moveRight(-velocity.x * delta);
     controls.moveForward(-velocity.z * delta);
     playerObj.position.y += velocity.y * delta;
