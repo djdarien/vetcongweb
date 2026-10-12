@@ -24,7 +24,6 @@ dir.castShadow = true;
 dir.shadow.mapSize.set(1024, 1024);
 scene.add(dir);
 
-// Varied ground
 const ground = new THREE.Mesh(
   new THREE.PlaneGeometry(500, 500, 16, 16),
   new THREE.MeshLambertMaterial({ color: 0x1e3d12 })
@@ -33,7 +32,6 @@ ground.rotation.x = -Math.PI / 2;
 ground.receiveShadow = true;
 scene.add(ground);
 
-// Dense trees
 const TREE_COUNT = 90;
 const dummy = new THREE.Object3D();
 const trunks = new THREE.InstancedMesh(
@@ -63,7 +61,6 @@ for (let i = 0; i < TREE_COUNT; i++) {
 trunks.instanceMatrix.needsUpdate = leaves.instanceMatrix.needsUpdate = true;
 scene.add(trunks, leaves);
 
-// Simple huts / cover
 const hutCount = 6;
 const hutGeo = new THREE.BoxGeometry(4, 2.5, 3);
 const hutMat = new THREE.MeshLambertMaterial({ color: 0x5a4630 });
@@ -82,7 +79,6 @@ for (let i = 0; i < hutCount; i++) {
   scene.add(roof);
 }
 
-// Crates
 const boxes = new THREE.InstancedMesh(
   new THREE.BoxGeometry(1.8, 1.8, 1.8),
   new THREE.MeshLambertMaterial({ color: 0x4a3820 }),
@@ -171,9 +167,9 @@ document.addEventListener('keyup', (e) => {
 const MAX_PARTICLES = 20;
 const particlePool = [];
 const pGeo = new THREE.SphereGeometry(0.06, 4, 4);
-const pMat = new THREE.MeshBasicMaterial({ color: 0xff8800 });
 for (let i = 0; i < MAX_PARTICLES; i++) {
-  const m = new THREE.Mesh(pGeo, pMat);
+  const mat = new THREE.MeshBasicMaterial({ color: 0xff8800 });
+  const m = new THREE.Mesh(pGeo, mat);
   m.visible = false;
   scene.add(m);
   particlePool.push({ mesh: m, life: 0 });
@@ -248,9 +244,9 @@ function connectMP() {
             seen.add(p.id);
             const m = getRemote(p.id);
             m.position.fromArray(p.pos);
-            if (p.rot) m.rotation.y = p.rot;
+            if (typeof p.rot === 'number') m.rotation.y = p.rot;
           }
-          for (const id of remotePlayers.keys()) {
+          for (const id of [...remotePlayers.keys()]) {
             if (!seen.has(id)) removeRemote(id);
           }
         } else if (msg.type === 'leave') {
@@ -259,6 +255,7 @@ function connectMP() {
       } catch (_) {}
     };
     ws.onclose = () => { hudDirty = true; };
+    ws.onerror = () => { hudDirty = true; };
   } catch (_) {}
 }
 connectMP();
@@ -339,13 +336,13 @@ function animate() {
   }
 
   netTimer += delta;
-  if (ws && ws.readyState === 1 && netTimer > 0.05) {
+  if (ws && ws.readyState === 1 && netTimer > 0.05 && myId) {
     netTimer = 0;
     ws.send(JSON.stringify({
       type: 'update',
       id: myId,
       pos: playerObj.position.toArray(),
-      rot: controls.getObject().rotation.y
+      rot: playerObj.rotation.y
     }));
   }
 
