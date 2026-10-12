@@ -1,4 +1,4 @@
-# vetcongweb
+#  
 
 Procedural Vietcong-style FPS. Mobile-friendly with settings menu. Fully generated content.
 
